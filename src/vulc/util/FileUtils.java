@@ -22,10 +22,18 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.FileAlreadyExistsException;
 
 /**
- * FileUtils allows to perform some basic File operations.
+ * FileUtils allows to perform some basic File operations:
+ * <ul>
+ * <li>copy</li>
+ * <li>move</li>
+ * <li>delete</li>
+ * <li>download</li>
+ * </ul>
  * @author Vulcalien
  */
 public final class FileUtils {
@@ -33,7 +41,22 @@ public final class FileUtils {
 	private FileUtils() {
 	}
 
-	// copy
+	private static void transferData(InputStream in, OutputStream out) {
+		try {
+			byte[] buffer = new byte[1024];
+			int lengthRead;
+			while((lengthRead = in.read(buffer)) >= 0) {
+				out.write(buffer, 0, lengthRead);
+				out.flush();
+			}
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	// --------
+	// - copy -
+	// --------
 	/**
 	 * Copies a file or a directory.
 	 * In this case, the destination is a file if the source is a file or it is a directory if the source is a directory.
@@ -131,23 +154,21 @@ public final class FileUtils {
 		try {
 			destination.createNewFile();
 
-			InputStream is = new FileInputStream(source);
-			OutputStream os = new FileOutputStream(destination);
+			InputStream in = new FileInputStream(source);
+			OutputStream out = new FileOutputStream(destination);
 
-			byte[] buffer = new byte[1024];
-			int lengthRead;
-			while((lengthRead = is.read(buffer)) > 0) {
-				os.write(buffer, 0, lengthRead);
-				os.flush();
-			}
-			is.close();
-			os.close();
+			transferData(in, out);
+
+			in.close();
+			out.close();
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	// move
+	// --------
+	// - move -
+	// --------
 	/**
 	 * Moves a file or a directory.<br>
 	 * In this case, the destination is a file if the source is a file or it is a directory if the source is a directory.
@@ -243,10 +264,13 @@ public final class FileUtils {
 		delete(source);
 	}
 
-	// delete
+	// ----------
+	// - delete -
+	// ----------
 	/**
 	 * Deletes a file or a directory.
 	 * @param file the file to delete
+	 *
 	 * @throws RuntimeException if the file still exists
 	 */
 	public static void delete(File file) {
@@ -261,6 +285,7 @@ public final class FileUtils {
 	/**
 	 * Deletes a file or a directory.
 	 * @param file the path of the file to delete
+	 *
 	 * @throws RuntimeException if the file still exists
 	 */
 	public static void delete(String file) {
@@ -284,6 +309,70 @@ public final class FileUtils {
 	private static void deleteFile(File file) {
 		file.delete();
 		if(file.exists()) throw new RuntimeException("Could not delete file: " + file);
+	}
+
+	// ------------
+	// - download -
+	// ------------
+	/**
+	 * Downloads a file from a url to the destination file.
+	 * @param url the URL referring to the data to download
+	 * @param destination the file that will store the downloaded data
+	 *
+	 * @throws IOException
+	 */
+	public static void download(URL url, File destination) {
+		try {
+			destination.createNewFile();
+
+			InputStream in = url.openStream();
+			OutputStream out = new FileOutputStream(destination);
+
+			transferData(in, out);
+
+			in.close();
+			out.close();
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Downloads a file from a url to the destination file.
+	 * @param url the URL referring to the data to download
+	 * @param destination the path of the destination file that will store the downloaded data
+	 *
+	 * @throws IOException
+	 */
+	public static void download(URL url, String destination) {
+		download(url, new File(destination));
+	}
+
+	/**
+	 * Downloads a file from a url to the destination file.
+	 * @param url the URL referring to the data to download
+	 * @param destination the file that will store the downloaded data
+	 *
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 */
+	public static void download(String url, File destination) {
+		try {
+			download(new URL(url), destination);
+		} catch(MalformedURLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Downloads a file from a url to the destination file.
+	 * @param url the URL referring to the data to download
+	 * @param destination the path of the destination file that will store the downloaded data
+	 *
+	 * @throws IOException
+	 */
+	public static void download(String url, String destination) {
+		download(url, new File(destination));
 	}
 
 }
