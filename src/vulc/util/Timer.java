@@ -54,7 +54,7 @@ public class Timer {
 
 					if(mayContinue) try {
 						Thread.sleep(1);
-					} catch (InterruptedException e) {
+					} catch(InterruptedException e) {
 						e.printStackTrace();
 					}
 				}

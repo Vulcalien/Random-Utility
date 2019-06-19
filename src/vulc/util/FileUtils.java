@@ -33,7 +33,7 @@ public final class FileUtils {
 	private FileUtils() {
 	}
 
-	//copy
+	// copy
 	/**
 	 * Copies a file or a directory.
 	 * In this case, the destination is a file if the source is a file or it is a directory if the source is a directory.
@@ -49,14 +49,16 @@ public final class FileUtils {
 			destination = destination.getCanonicalFile();
 
 			if(!source.exists()) throw new FileNotFoundException(source.toString());
-			if(source.equals(destination)) throw new IOException("Source file: " + source + " equals destination file: " + destination);
-		} catch (IOException e) {
+			if(source.equals(destination))
+			    throw new IOException("Source file: " + source + " equals destination file: " + destination);
+		} catch(IOException e) {
 			e.printStackTrace();
 			return;
 		}
 		try {
 			destination.getParentFile().mkdirs();
-		} catch (NullPointerException e) {
+		} catch(NullPointerException e) {
+			// in this case the parent's directory is a root
 		}
 
 		if(source.isDirectory()) {
@@ -140,12 +142,12 @@ public final class FileUtils {
 			}
 			is.close();
 			os.close();
-		} catch (IOException e) {
+		} catch(IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	//move
+	// move
 	/**
 	 * Moves a file or a directory.<br>
 	 * In this case, the destination is a file if the source is a file or it is a directory if the source is a directory.
@@ -163,12 +165,14 @@ public final class FileUtils {
 			destination = destination.getCanonicalFile();
 
 			if(!source.exists()) throw new FileNotFoundException(source.toString());
-			if(source.equals(destination)) throw new IOException("Source file: " + source + " equals destination file: " + destination);
+			if(source.equals(destination))
+			    throw new IOException("Source file: " + source + " equals destination file: " + destination);
 
 			if(source.isDirectory()) {
 				if(destination.exists()) throw new FileAlreadyExistsException(destination.toString());
 				if(destination.getPath().startsWith(source.getPath() + File.separator))
-					throw new IOException("Cannot not move directory: " + source + " to a subdirectory: " + destination);
+				    throw new IOException("Cannot not move directory: " + source +
+				                          " to a subdirectory: " + destination);
 				moveDirectory(source, destination);
 			} else if(source.isFile()) {
 				moveFile(source, destination);
@@ -239,7 +243,7 @@ public final class FileUtils {
 		delete(source);
 	}
 
-	//delete
+	// delete
 	/**
 	 * Deletes a file or a directory.
 	 * @param file the file to delete
