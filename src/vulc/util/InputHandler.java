@@ -27,6 +27,8 @@ public class InputHandler implements KeyListener, MouseListener {
 	private final List<Key> mouseKeys = new ArrayList<Key>();
 
 	public void init(Component component) {
+		component.setFocusTraversalKeysEnabled(false);
+
 		component.addKeyListener(this);
 		component.addMouseListener(this);
 	}
