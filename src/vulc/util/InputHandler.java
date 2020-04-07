@@ -41,10 +41,8 @@ public class InputHandler implements KeyListener, MouseListener {
 
 	private void receiveInput(KeyAction action, KeyType type, int code) {
 		List<Key> keys = getList(type);
-		for(int i = 0; i < keys.size(); i++) {
-			Key key = keys.get(i);
+		for(Key key : keys) {
 			if(key.code == code) {
-
 				if(action == KeyAction.PRESS) {
 					key.shouldStayDown = true;
 				} else if(action == KeyAction.RELEASE) {
