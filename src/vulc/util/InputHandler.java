@@ -103,8 +103,6 @@ public class InputHandler implements KeyListener, MouseListener {
 
 		private boolean isKeyDown = false;
 		private boolean wasKeyDown = false;
-		private boolean isReleased = false;
-		private boolean isPressed = false;
 
 		public Key() {
 		}
@@ -122,10 +120,8 @@ public class InputHandler implements KeyListener, MouseListener {
 		}
 
 		private void tick() {
-			isKeyDown = shouldStayDown;
-			isPressed = !wasKeyDown && isKeyDown;
-			isReleased = wasKeyDown && !isKeyDown;
 			wasKeyDown = isKeyDown;
+			isKeyDown = shouldStayDown;
 
 			if(shouldRelease) {
 				shouldRelease = false;
@@ -143,11 +139,11 @@ public class InputHandler implements KeyListener, MouseListener {
 		}
 
 		public boolean isPressed() {
-			return isPressed;
+			return !wasKeyDown && isKeyDown;
 		}
 
 		public boolean isReleased() {
-			return isReleased;
+			return wasKeyDown && !isKeyDown;
 		}
 
 	}
