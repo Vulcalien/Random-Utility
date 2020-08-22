@@ -5,14 +5,20 @@
 package vulc.util;
 
 import java.awt.Component;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InputHandler implements KeyListener, MouseListener {
+public class InputHandler implements KeyListener,
+                          MouseListener,
+                          MouseMotionListener,
+                          FocusListener {
 
 	public static enum KeyType {
 		KEYBOARD, MOUSE
@@ -26,11 +32,15 @@ public class InputHandler implements KeyListener, MouseListener {
 	private final List<Key> keyboardKeys = new ArrayList<Key>();
 	private final List<Key> mouseKeys = new ArrayList<Key>();
 
+	public int xMouse = -1, yMouse = -1;
+
 	public void init(Component component) {
 		component.setFocusTraversalKeysEnabled(false);
 
 		component.addKeyListener(this);
 		component.addMouseListener(this);
+		component.addMouseMotionListener(this);
+		component.addFocusListener(this);
 	}
 
 	public void tick() {
@@ -91,6 +101,25 @@ public class InputHandler implements KeyListener, MouseListener {
 	}
 
 	public void mouseExited(MouseEvent e) {
+	}
+
+	public void mouseDragged(MouseEvent e) {
+		xMouse = e.getX();
+		yMouse = e.getY();
+	}
+
+	public void mouseMoved(MouseEvent e) {
+		xMouse = e.getX();
+		yMouse = e.getY();
+	}
+
+	public void focusGained(FocusEvent e) {
+	}
+
+	public void focusLost(FocusEvent e) {
+		for(Key key : keys) {
+			key.shouldRelease = true;
+		}
 	}
 
 	public class Key {
