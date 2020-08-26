@@ -54,9 +54,13 @@ public class InputHandler implements KeyListener,
 		for(Key key : keys) {
 			if(key.code == code) {
 				if(action == KeyAction.PRESS) {
-					key.shouldStayDown = true;
+					if(key.toTickWasReleased) {
+						key.toTickPressCount++;
+						key.toTickWasReleased = false;
+					}
 				} else if(action == KeyAction.RELEASE) {
-					key.shouldRelease = true;
+					key.toTickReleaseCount++;
+					key.toTickWasReleased = true;
 				}
 			}
 		}
@@ -118,7 +122,10 @@ public class InputHandler implements KeyListener,
 
 	public void focusLost(FocusEvent e) {
 		for(Key key : keys) {
-			key.shouldRelease = true;
+			if(!key.toTickWasReleased) {
+				key.toTickReleaseCount++;
+				key.toTickWasReleased = true;
+			}
 		}
 	}
 
@@ -127,11 +134,16 @@ public class InputHandler implements KeyListener,
 		private KeyType type;
 		private int code;
 
-		private boolean shouldStayDown = false;
-		private boolean shouldRelease = false;
+		private int toTickPressCount = 0;
+		private int toTickReleaseCount = 0;
 
+		private boolean toTickWasReleased = true;
+
+		private int pressCount;
+		private int releaseCount;
+
+		private boolean shouldStayDown = false;
 		private boolean isKeyDown = false;
-		private boolean wasKeyDown = false;
 
 		public Key() {
 		}
@@ -149,13 +161,15 @@ public class InputHandler implements KeyListener,
 		}
 
 		private void tick() {
-			wasKeyDown = isKeyDown;
-			isKeyDown = shouldStayDown;
+			pressCount = toTickPressCount;
+			releaseCount = toTickReleaseCount;
 
-			if(shouldRelease) {
-				shouldRelease = false;
-				shouldStayDown = false;
-			}
+			toTickPressCount = 0;
+			toTickReleaseCount = 0;
+
+			if(pressCount != 0) shouldStayDown = true;
+			isKeyDown = shouldStayDown;
+			if(releaseCount != 0) shouldStayDown = false;
 		}
 
 		public void setKeyBinding(KeyType newType, int newCode) {
@@ -168,11 +182,19 @@ public class InputHandler implements KeyListener,
 		}
 
 		public boolean isPressed() {
-			return !wasKeyDown && isKeyDown;
+			return pressCount != 0;
 		}
 
 		public boolean isReleased() {
-			return wasKeyDown && !isKeyDown;
+			return releaseCount != 0;
+		}
+
+		public int pressCount() {
+			return pressCount;
+		}
+
+		public int releaseCount() {
+			return releaseCount;
 		}
 
 	}
