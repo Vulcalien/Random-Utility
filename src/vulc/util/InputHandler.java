@@ -48,6 +48,8 @@ public class InputHandler implements KeyListener,
 		for(int i = 0; i < keys.size(); i++) {
 			keys.get(i).tick();
 		}
+		xMouse = xMouseToTick;
+		yMouse = yMouseToTick;
 	}
 
 	private void receiveInput(KeyAction action, KeyType type, int code) {
@@ -171,9 +173,6 @@ public class InputHandler implements KeyListener,
 			if(pressCount != 0) shouldStayDown = true;
 			isKeyDown = shouldStayDown;
 			if(releaseCount != 0) shouldStayDown = false;
-
-			xMouse = xMouseToTick;
-			yMouse = yMouseToTick;
 		}
 
 		public void setKeyBinding(KeyType newType, int newCode) {
