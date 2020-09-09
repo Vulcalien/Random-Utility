@@ -32,6 +32,7 @@ public class InputHandler implements KeyListener,
 	private final List<Key> keyboardKeys = new ArrayList<Key>();
 	private final List<Key> mouseKeys = new ArrayList<Key>();
 
+	private int xMouseToTick = -1, yMouseToTick = -1;
 	public int xMouse = -1, yMouse = -1;
 
 	public void init(Component component) {
@@ -108,13 +109,13 @@ public class InputHandler implements KeyListener,
 	}
 
 	public void mouseDragged(MouseEvent e) {
-		xMouse = e.getX();
-		yMouse = e.getY();
+		xMouseToTick = e.getX();
+		yMouseToTick = e.getY();
 	}
 
 	public void mouseMoved(MouseEvent e) {
-		xMouse = e.getX();
-		yMouse = e.getY();
+		xMouseToTick = e.getX();
+		yMouseToTick = e.getY();
 	}
 
 	public void focusGained(FocusEvent e) {
@@ -170,6 +171,9 @@ public class InputHandler implements KeyListener,
 			if(pressCount != 0) shouldStayDown = true;
 			isKeyDown = shouldStayDown;
 			if(releaseCount != 0) shouldStayDown = false;
+
+			xMouse = xMouseToTick;
+			yMouse = yMouseToTick;
 		}
 
 		public void setKeyBinding(KeyType newType, int newCode) {
