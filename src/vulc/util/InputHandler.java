@@ -159,7 +159,7 @@ public class InputHandler implements KeyListener,
 			this.type = type;
 			this.code = code;
 
-			keys.add(this);
+			if(!keys.contains(this)) keys.add(this);
 			getList(type).add(this);
 		}
 
