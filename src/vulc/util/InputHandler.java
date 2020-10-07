@@ -131,7 +131,6 @@ public class InputHandler implements KeyListener,
 		}
 	}
 
-	// TODO allow multiple keys to have the same binding
 	public class Key {
 
 		private KeyType type;
@@ -156,11 +155,11 @@ public class InputHandler implements KeyListener,
 		}
 
 		private void init(KeyType type, int code) {
+			if(this.type == null) keys.add(this);
+			getGroup(type).put(code, this);
+
 			this.type = type;
 			this.code = code;
-
-			if(!keys.contains(this)) keys.add(this);
-			getGroup(type).put(code, this);
 		}
 
 		private void tick() {
@@ -175,9 +174,25 @@ public class InputHandler implements KeyListener,
 			if(releaseCount != 0) shouldStayDown = false;
 		}
 
+		public KeyType getType() {
+			return type;
+		}
+
+		public int getCode() {
+			return code;
+		}
+
 		public void setKeyBinding(KeyType newType, int newCode) {
-			if(this.type != null) getGroup(this.type).remove(code);
+			if(type != null) getGroup(type).remove(code);
 			init(newType, newCode);
+		}
+
+		public void unbind() {
+			if(type == null) return;
+
+			getGroup(type).remove(code);
+			keys.remove(this);
+			type = null;
 		}
 
 		public boolean isKeyDown() {
