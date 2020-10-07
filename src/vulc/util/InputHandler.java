@@ -22,7 +22,13 @@ public class InputHandler implements KeyListener,
                           FocusListener {
 
 	public static enum KeyType {
-		KEYBOARD, MOUSE
+		KEYBOARD(0), MOUSE(1);
+
+		int id;
+
+		private KeyType(int id) {
+			this.id = id;
+		}
 	}
 
 	public static enum KeyAction {
@@ -30,8 +36,12 @@ public class InputHandler implements KeyListener,
 	}
 
 	private final List<Key> keys = new ArrayList<Key>();
-	private final HashMap<Integer, Key> keyboardKeys = new HashMap<Integer, Key>();
-	private final HashMap<Integer, Key> mouseKeys = new HashMap<Integer, Key>();
+
+	@SuppressWarnings("rawtypes")
+	private final HashMap[] keyGroups = {
+	    new HashMap<Integer, Key>(), // KEYBOARD
+	    new HashMap<Integer, Key>()  // MOUSE
+	};
 
 	private int xMouseToTick = -1, yMouseToTick = -1;
 	public int xMouse = -1, yMouse = -1;
@@ -68,17 +78,9 @@ public class InputHandler implements KeyListener,
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private HashMap<Integer, Key> getGroup(KeyType type) {
-		switch(type) {
-			case KEYBOARD:
-				return keyboardKeys;
-
-			case MOUSE:
-				return mouseKeys;
-
-			default:
-				return null;
-		}
+		return keyGroups[type.id];
 	}
 
 	public void keyTyped(KeyEvent e) {
