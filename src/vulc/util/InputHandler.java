@@ -13,6 +13,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class InputHandler implements KeyListener,
@@ -29,8 +30,8 @@ public class InputHandler implements KeyListener,
 	}
 
 	private final List<Key> keys = new ArrayList<Key>();
-	private final List<Key> keyboardKeys = new ArrayList<Key>();
-	private final List<Key> mouseKeys = new ArrayList<Key>();
+	private final HashMap<Integer, Key> keyboardKeys = new HashMap<Integer, Key>();
+	private final HashMap<Integer, Key> mouseKeys = new HashMap<Integer, Key>();
 
 	private int xMouseToTick = -1, yMouseToTick = -1;
 	public int xMouse = -1, yMouse = -1;
@@ -53,23 +54,21 @@ public class InputHandler implements KeyListener,
 	}
 
 	private void receiveInput(KeyAction action, KeyType type, int code) {
-		List<Key> keys = getList(type);
-		for(Key key : keys) {
-			if(key.code == code) {
-				if(action == KeyAction.PRESS) {
-					if(key.toTickWasReleased) {
-						key.toTickPressCount++;
-						key.toTickWasReleased = false;
-					}
-				} else if(action == KeyAction.RELEASE) {
-					key.toTickReleaseCount++;
-					key.toTickWasReleased = true;
-				}
+		Key key = getGroup(type).get(code);
+		if(key == null) return;
+
+		if(action == KeyAction.PRESS) {
+			if(key.toTickWasReleased) {
+				key.toTickPressCount++;
+				key.toTickWasReleased = false;
 			}
+		} else if(action == KeyAction.RELEASE) {
+			key.toTickReleaseCount++;
+			key.toTickWasReleased = true;
 		}
 	}
 
-	private List<Key> getList(KeyType type) {
+	private HashMap<Integer, Key> getGroup(KeyType type) {
 		switch(type) {
 			case KEYBOARD:
 				return keyboardKeys;
@@ -132,6 +131,7 @@ public class InputHandler implements KeyListener,
 		}
 	}
 
+	// TODO allow multiple keys to have the same binding
 	public class Key {
 
 		private KeyType type;
@@ -160,7 +160,7 @@ public class InputHandler implements KeyListener,
 			this.code = code;
 
 			if(!keys.contains(this)) keys.add(this);
-			getList(type).add(this);
+			getGroup(type).put(code, this);
 		}
 
 		private void tick() {
@@ -176,7 +176,7 @@ public class InputHandler implements KeyListener,
 		}
 
 		public void setKeyBinding(KeyType newType, int newCode) {
-			if(this.type != null) getList(this.type).remove(this);
+			if(this.type != null) getGroup(this.type).remove(code);
 			init(newType, newCode);
 		}
 
