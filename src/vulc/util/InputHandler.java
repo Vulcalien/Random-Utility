@@ -21,26 +21,20 @@ public class InputHandler implements KeyListener,
                           MouseMotionListener,
                           FocusListener {
 
-	public static enum KeyType {
-		KEYBOARD(0), MOUSE(1);
-
-		int id;
-
-		private KeyType(int id) {
-			this.id = id;
-		}
-	}
-
 	public static enum KeyAction {
 		PRESS, RELEASE
 	}
 
-	private final List<Key> keys = new ArrayList<Key>();
+	public static final int UNBIND = -1;
+	public static final int KEYBOARD = 0;
+	public static final int MOUSE = 1;
+
+	private final List<KeyReference> keys = new ArrayList<KeyReference>();
 
 	@SuppressWarnings("rawtypes")
 	private final HashMap[] keyGroups = {
-	    new HashMap<Integer, Key>(), // KEYBOARD
-	    new HashMap<Integer, Key>()  // MOUSE
+	    new HashMap<Integer, KeyReference>(), // KEYBOARD
+	    new HashMap<Integer, KeyReference>()  // MOUSE
 	};
 
 	private int xMouseToTick = -1, yMouseToTick = -1;
@@ -56,15 +50,15 @@ public class InputHandler implements KeyListener,
 	}
 
 	public void tick() {
-		for(int i = 0; i < keys.size(); i++) {
-			keys.get(i).tick();
+		for(KeyReference key : keys) {
+			key.tick();
 		}
 		xMouse = xMouseToTick;
 		yMouse = yMouseToTick;
 	}
 
-	private void receiveInput(KeyAction action, KeyType type, int code) {
-		Key key = getGroup(type).get(code);
+	private void receiveInput(KeyAction action, int type, int code) {
+		KeyReference key = getGroup(type).get(code);
 		if(key == null) return;
 
 		if(action == KeyAction.PRESS) {
@@ -79,30 +73,30 @@ public class InputHandler implements KeyListener,
 	}
 
 	@SuppressWarnings("unchecked")
-	private HashMap<Integer, Key> getGroup(KeyType type) {
-		return keyGroups[type.id];
+	private HashMap<Integer, KeyReference> getGroup(int type) {
+		return keyGroups[type];
 	}
 
 	public void keyTyped(KeyEvent e) {
 	}
 
 	public void keyPressed(KeyEvent e) {
-		receiveInput(KeyAction.PRESS, KeyType.KEYBOARD, e.getKeyCode());
+		receiveInput(KeyAction.PRESS, KEYBOARD, e.getKeyCode());
 	}
 
 	public void keyReleased(KeyEvent e) {
-		receiveInput(KeyAction.RELEASE, KeyType.KEYBOARD, e.getKeyCode());
+		receiveInput(KeyAction.RELEASE, KEYBOARD, e.getKeyCode());
 	}
 
 	public void mouseClicked(MouseEvent e) {
 	}
 
 	public void mousePressed(MouseEvent e) {
-		receiveInput(KeyAction.PRESS, KeyType.MOUSE, e.getButton());
+		receiveInput(KeyAction.PRESS, MOUSE, e.getButton());
 	}
 
 	public void mouseReleased(MouseEvent e) {
-		receiveInput(KeyAction.RELEASE, KeyType.MOUSE, e.getButton());
+		receiveInput(KeyAction.RELEASE, MOUSE, e.getButton());
 	}
 
 	public void mouseEntered(MouseEvent e) {
@@ -125,7 +119,7 @@ public class InputHandler implements KeyListener,
 	}
 
 	public void focusLost(FocusEvent e) {
-		for(Key key : keys) {
+		for(KeyReference key : keys) {
 			if(!key.toTickWasReleased) {
 				key.toTickReleaseCount++;
 				key.toTickWasReleased = true;
@@ -133,10 +127,12 @@ public class InputHandler implements KeyListener,
 		}
 	}
 
-	public class Key {
+	private class KeyReference {
 
-		private KeyType type;
-		private int code;
+		private final int type;
+		private final int code;
+
+		private int links = 0;
 
 		private int toTickPressCount = 0;
 		private int toTickReleaseCount = 0;
@@ -149,19 +145,20 @@ public class InputHandler implements KeyListener,
 		private boolean shouldStayDown = false;
 		private boolean isKeyDown = false;
 
-		public Key() {
-		}
-
-		public Key(KeyType type, int code) {
-			init(type, code);
-		}
-
-		private void init(KeyType type, int code) {
-			if(this.type == null) keys.add(this);
-			getGroup(type).put(code, this);
-
+		private KeyReference(int type, int code) {
 			this.type = type;
 			this.code = code;
+
+			keys.add(this);
+			getGroup(type).put(code, this);
+		}
+
+		private void unbind() {
+			links--;
+			if(links == 0) {
+				keys.remove(this);
+				getGroup(type).remove(code);
+			}
 		}
 
 		private void tick() {
@@ -176,45 +173,91 @@ public class InputHandler implements KeyListener,
 			if(releaseCount != 0) shouldStayDown = false;
 		}
 
-		public KeyType getType() {
-			return type;
+	}
+
+	public class Key {
+
+		private KeyReference reference;
+
+		public Key() {
 		}
 
-		public int getCode() {
-			return code;
+		public Key(int type, int code) {
+			setKeyBinding(type, code);
 		}
 
-		public void setKeyBinding(KeyType newType, int newCode) {
-			if(type != null) getGroup(type).remove(code);
-			init(newType, newCode);
+		public void setKeyBinding(int type, int code) {
+			unbind();
+
+			reference = getGroup(type).get(code);
+			if(reference == null) {
+				reference = new KeyReference(type, code);
+				getGroup(type).put(code, reference);
+			}
+			reference.links++;
 		}
 
 		public void unbind() {
-			if(type == null) return;
-
-			getGroup(type).remove(code);
-			keys.remove(this);
-			type = null;
+			if(reference != null) {
+				reference.unbind();
+				reference = null;
+			}
 		}
 
-		public boolean isKeyDown() {
-			return isKeyDown;
+		public int getType() {
+			try {
+				return reference.type;
+			} catch(NullPointerException e) {
+				return -1;
+			}
 		}
 
-		public boolean isPressed() {
-			return pressCount != 0;
+		public int getCode() {
+			try {
+				return reference.code;
+			} catch(NullPointerException e) {
+				return -1;
+			}
 		}
 
-		public boolean isReleased() {
-			return releaseCount != 0;
+		public boolean down() {
+			try {
+				return reference.isKeyDown;
+			} catch(NullPointerException e) {
+				return false;
+			}
+		}
+
+		public boolean pressed() {
+			try {
+				return reference.pressCount != 0;
+			} catch(NullPointerException e) {
+				return false;
+			}
+		}
+
+		public boolean released() {
+			try {
+				return reference.releaseCount != 0;
+			} catch(NullPointerException e) {
+				return false;
+			}
 		}
 
 		public int pressCount() {
-			return pressCount;
+			try {
+				return reference.pressCount;
+			} catch(NullPointerException e) {
+				return 0;
+			}
 		}
 
 		public int releaseCount() {
-			return releaseCount;
+			try {
+				return reference.releaseCount;
+			} catch(NullPointerException e) {
+				return 0;
+			}
 		}
 
 	}
