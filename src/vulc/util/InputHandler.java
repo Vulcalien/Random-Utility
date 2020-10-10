@@ -205,59 +205,38 @@ public class InputHandler implements KeyListener,
 		}
 
 		public int getType() {
-			try {
-				return reference.type;
-			} catch(NullPointerException e) {
-				return -1;
-			}
+			if(reference != null) return reference.type;
+			else return -1;
 		}
 
 		public int getCode() {
-			try {
-				return reference.code;
-			} catch(NullPointerException e) {
-				return -1;
-			}
+			if(reference != null) return reference.code;
+			else return -1;
 		}
 
 		public boolean down() {
-			try {
-				return reference.isKeyDown;
-			} catch(NullPointerException e) {
-				return false;
-			}
+			if(reference != null) return reference.isKeyDown;
+			else return false;
 		}
 
 		public boolean pressed() {
-			try {
-				return reference.pressCount != 0;
-			} catch(NullPointerException e) {
-				return false;
-			}
+			if(reference != null) return reference.pressCount != 0;
+			else return false;
 		}
 
 		public boolean released() {
-			try {
-				return reference.releaseCount != 0;
-			} catch(NullPointerException e) {
-				return false;
-			}
+			if(reference != null) return reference.releaseCount != 0;
+			else return false;
 		}
 
 		public int pressCount() {
-			try {
-				return reference.pressCount;
-			} catch(NullPointerException e) {
-				return 0;
-			}
+			if(reference != null) return reference.pressCount;
+			else return 0;
 		}
 
 		public int releaseCount() {
-			try {
-				return reference.releaseCount;
-			} catch(NullPointerException e) {
-				return 0;
-			}
+			if(reference != null) return reference.releaseCount;
+			else return 0;
 		}
 
 	}
