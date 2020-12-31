@@ -30,7 +30,7 @@ public class InputHandler implements KeyListener,
                           MouseMotionListener,
                           FocusListener {
 
-	public enum KeyAction {
+	private enum KeyAction {
 		PRESS, RELEASE
 	}
 
