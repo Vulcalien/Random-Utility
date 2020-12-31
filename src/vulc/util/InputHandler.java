@@ -22,7 +22,7 @@ import java.util.List;
  *
  * <p>This class uses Java AWT.
  * 
- * @version  1.0.0
+ * @version  1.0.1
  * @author   Vulcalien
  */
 public class InputHandler implements KeyListener,
@@ -209,10 +209,8 @@ public class InputHandler implements KeyListener,
 			unbind();
 
 			reference = getGroup(type).get(code);
-			if(reference == null) {
-				reference = new KeyReference(type, code);
-				getGroup(type).put(code, reference);
-			}
+			if(reference == null) reference = new KeyReference(type, code);
+
 			reference.links++;
 		}
 
