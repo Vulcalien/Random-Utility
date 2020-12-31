@@ -16,17 +16,29 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * An easy to use InputHandler supporting keys and mouse buttons.
+ * Suitable for every desktop application or game that uses ticking.
+ *
+ * <p>This class uses Java AWT.
+ * 
+ * @version  1.0.0
+ * @author   Vulcalien
+ */
 public class InputHandler implements KeyListener,
                           MouseListener,
                           MouseMotionListener,
                           FocusListener {
 
-	public static enum KeyAction {
+	public enum KeyAction {
 		PRESS, RELEASE
 	}
 
-	public static final int UNBIND = -1;
+	/** The type of an unbound key */
+	public static final int UNBOUND = -1;
+	/** The type of a keyboard key */
 	public static final int KEYBOARD = 0;
+	/** The type of a mouse key */
 	public static final int MOUSE = 1;
 
 	private final List<KeyReference> keys = new ArrayList<KeyReference>();
@@ -49,6 +61,10 @@ public class InputHandler implements KeyListener,
 		component.addFocusListener(this);
 	}
 
+	/**
+	 * Updates all key references and the mouse position.
+	 * This method should be called before any input is processed.
+	 */
 	public void tick() {
 		for(KeyReference key : keys) {
 			key.tick();
@@ -127,6 +143,9 @@ public class InputHandler implements KeyListener,
 		}
 	}
 
+	/**
+	 * Instances of this class register inputs and are ticked by the InputHandler.
+	 */
 	private class KeyReference {
 
 		private final int type;
@@ -206,7 +225,7 @@ public class InputHandler implements KeyListener,
 
 		public int getType() {
 			if(reference != null) return reference.type;
-			else return -1;
+			else return UNBOUND;
 		}
 
 		public int getCode() {
