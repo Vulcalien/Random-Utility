@@ -1,7 +1,7 @@
-/*******************************************************************************
+/*
  * Copyright 2019 Vulcalien
- * This code or part of it is licensed under MIT License by Vulcalien
- ******************************************************************************/
+ * This code is licensed under MIT License by Vulcalien (see LICENSE)
+ */
 package vulc.util;
 
 import java.io.BufferedInputStream;
